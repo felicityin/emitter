@@ -7,11 +7,14 @@ use std::sync::{
     Arc,
 };
 
+use emit_data::eth_tx::{send_eth_tx, IMAGE_CELL_ADDRESS};
+use emit_data::tx_data::convert_cell;
 use global_state::GlobalState;
 use rpc_client::{IndexerTip, RpcClient};
 use rpc_server::{EmitterRpc, EmitterServer};
 
 mod cell_process;
+mod emit_data;
 mod global_state;
 mod header_sync;
 mod rpc_client;
@@ -112,6 +115,11 @@ async fn submit_cells(submits: Vec<Submit>) {
     for sub in submits {
         println!("{}", serde_json::to_string_pretty(&sub).unwrap())
     }
+
+    for data in submits {
+        send_eth_tx(convert_cell(data), IMAGE_CELL_ADDRESS).await.expect("failed to emite cells");
+    }
+    println!("send eth tx done");
 }
 
 async fn submit_headers(headers: Vec<HeaderView>) {
